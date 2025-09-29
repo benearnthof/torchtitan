@@ -339,3 +339,5 @@ class Transformer(nn.Module):
         # else:
         #     loss = None
         # return logits, loss
+        # TODO: loss is defined like so https://github.com/pytorch/torchtitan/blob/5b5d46856b400c8550989415bee91473aab4f921/torchtitan/components/loss.py#L19
+        # this should be equivalent, but check nonetheless
