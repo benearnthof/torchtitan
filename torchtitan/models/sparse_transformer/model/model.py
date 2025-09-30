@@ -163,7 +163,7 @@ class TransformerBlock(nn.Module):
         self.n_heads = model_args.n_heads
         self.dim = model_args.dim
         self.attention = Attention(model_args)
-        self.mlp = FeedForward(
+        self.feed_forward = FeedForward(
             dim=model_args.dim,
             hidden_dim=model_args.dim,
             multiple_of=model_args.multiple_of,
@@ -189,14 +189,14 @@ class TransformerBlock(nn.Module):
             """
             # prenorm implementation
             h = x + self.attention(self.attention_norm(x), freqs_cis)
-            out = h + self.mlp(self.ffn_norm(h))
+            out = h + self.feed_forward(self.ffn_norm(h))
             return out
 
     def init_weights(self):
         for norm in (self.attention_norm, self.ffn_norm):
             norm.reset_parameters()
         self.attention.init_weights(self.weight_init_std)
-        self.mlp.init_weights(self.weight_init_std)
+        self.feed_forward.init_weights(self.weight_init_std)
 
 
 class Transformer(nn.Module):
@@ -310,6 +310,7 @@ class Transformer(nn.Module):
             torch.Tensor: Output logits after applying the Transformer model.
 
         """
+        # bypass in the case of pipeline parallelism
         if self.tok_emb:
             device = self.freqs_cis.device
             b, t = tokens.size()
